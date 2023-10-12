@@ -1,0 +1,39 @@
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Load the dataset
+data = pd.read_csv('SMSSpamCollection', sep='\t', names=['label', 'message'])
+
+# Data preprocessing
+data['label'] = data['label'].map({'ham': 0, 'spam': 1})
+
+# Split the dataset into training and testing sets
+X = data['message']
+y = data['label']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Text vectorization using TF-IDF
+vectorizer = TfidfVectorizer()
+X_train_tfidf = vectorizer.fit_transform(X_train)
+X_test_tfidf = vectorizer.transform(X_test)
+
+# Train a spam classifier (Naive Bayes)
+classifier = MultinomialNB()
+classifier.fit(X_train_tfidf, y_train)
+
+# Predict on the test set
+y_pred = classifier.predict(X_test_tfidf)
+
+# Evaluate the classifier
+accuracy = accuracy_score(y_test, y_pred)
+confusion = confusion_matrix(y_test, y_pred)
+classification_rep = classification_report(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+print("\nConfusion Matrix:\n", confusion)
+print("\nClassification Report:\n", classification_rep)
+
+# You can now use this trained model for spam classification
